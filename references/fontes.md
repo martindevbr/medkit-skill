@@ -15,6 +15,7 @@ Todas as fontes abaixo foram testadas em 2026-09-14. Para cada uma: **o que cobr
 | `DADOS_ABERTOS_MEDICAMENTOS.csv` | todos os medicamentos registrados: nome, princípio ativo, classe terapêutica, categoria (genérico/similar/novo), registro, situação, detentora | 7,9 MB |
 | `TA_RESTRICAO_MEDICAMENTO.csv` | restrições de uso e prescrição | 1,8 MB |
 | `TA_PRECO_MEDICAMENTO.csv` | preço máximo ao consumidor (CMED) | 15,8 MB |
+| `TA_PRODUTO_SAUDE_SITE.csv` | produtos para saúde (correlatos): curativos, coberturas, cateteres, sondas, com nome comercial, nome técnico, classe de risco, detentora e validade | 27,6 MB |
 | `VigiMed_Reacoes.csv` | reações adversas notificadas no Brasil | 239 MB |
 | `VigiMed_Medicamentos.csv` | medicamentos das notificações VigiMed | 142 MB |
 
@@ -106,6 +107,7 @@ Seções disponíveis: `boxed_warning`, `indications_and_usage`, `dosage_and_adm
 | Fonte | Estado | Observação |
 |---|---|---|
 | ANVISA Dados Abertos | estável | download direto |
+| ANVISA produtos para saúde | estável | mesma origem; a base repete linhas, o `produto` desduplica |
 | SIGTAP (FTP) | estável | layout autodescrito |
 | openFDA | estável | 1.000 req/dia |
 | PubMed | estável | 3 req/s |

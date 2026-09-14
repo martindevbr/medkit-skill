@@ -14,6 +14,7 @@ Comandos:
   proc  <termo>         procedimentos do SUS (SIGTAP)
   ram   <termo>         reacoes adversas notificadas no Brasil (VigiMed)
   preco <termo>         preco maximo ao consumidor (CMED/ANVISA)
+  produto <termo>       curativos, coberturas e dispositivos (ANVISA, produtos para saude)
   artigos <termo>       literatura (PubMed E-utilities)
 """
 import csv
@@ -52,6 +53,8 @@ SOURCES = {
               "CID-10 completa (DATASUS)", False),
     "sigtap": (SIGTAP_FTP, "sigtap.zip",
                "Procedimentos do SUS (tabela unificada)", False),
+    "produtos": (ANVISA + "TA_PRODUTO_SAUDE_SITE.csv", "anvisa_produtos_saude.csv",
+                 "Produtos para saude: curativos, coberturas, dispositivos", False),
     "vigimed_r": (ANVISA + "VigiMed_Reacoes.csv", "vigimed_reacoes.csv",
                   "Reacoes adversas notificadas (239 MB)", True),
     "vigimed_m": (ANVISA + "VigiMed_Medicamentos.csv", "vigimed_medicamentos.csv",
@@ -210,6 +213,69 @@ def cmd_preco(args):
     for r in hits[:12]:
         print("  " + " | ".join("%s=%s" % (k, v) for k, v in list(r.items())[:8] if v and v.strip()))
     print("\nFonte: ANVISA/CMED - TA_PRECO_MEDICAMENTO.csv")
+
+
+def cmd_produto(args):
+    """Curativo, cobertura, cateter, seringa: nada disso e medicamento.
+
+    Material de curativo e registrado na ANVISA como PRODUTO PARA SAUDE
+    (correlato), numa base separada. Procurar "hidrofibra" na base de
+    medicamentos nao acha nada, e a ausencia ali nao significa que o produto
+    nao exista, significa que ele nao mora la.
+    """
+    termos = [norm(a) for a in args if a.strip()]
+    if not termos:
+        sys.exit("[!] uso: python med.py produto <nome comercial ou tipo>")
+    p = need("produtos")
+
+    # Nome comercial de curativo costuma ser uma frase inteira ("Aquacel Extra
+    # curativo de hidrofibra com fibra de reforco"). Casar substring da frase
+    # toda nao acha nada; casar TODAS as palavras acha.
+    vistos = set()
+    hits = []
+    for r in read_csv_rows(p):
+        texto = norm("%s %s" % (r.get("NOME_COMERCIAL", ""), r.get("NOME_TECNICO", "")))
+        if not all(x in texto for x in termos):
+            continue
+        chave = (r.get("NUMERO_REGISTRO_CADASTRO", ""), r.get("NOME_COMERCIAL", ""))
+        if chave in vistos:
+            continue      # a base repete a mesma linha
+        vistos.add(chave)
+        hits.append(r)
+
+    # Registro vencido continua no arquivo. O que esta valendo vem primeiro.
+    hits.sort(key=lambda r: 0 if vigente(r.get("VALIDADE_REGISTRO_CADASTRO", "")) else 1)
+    show(hits, [
+        ("Produto", "NOME_COMERCIAL"),
+        ("Tipo (nome tecnico)", "NOME_TECNICO"),
+        ("Classe de risco", "CLASSE_RISCO"),
+        ("Registro/cadastro", "NUMERO_REGISTRO_CADASTRO"),
+        ("Detentora", "DETENTOR_REGISTRO_CADASTRO"),
+        ("Fabricante", "NOME_FABRICANTE"),
+        ("Validade", "VALIDADE_REGISTRO_CADASTRO"),
+    ], 15, "ANVISA - produtos para saude com '%s'" % " ".join(args))
+    if not hits:
+        print("Procure tambem pelo TIPO em vez da marca: 'produto curativo hidrofibra',")
+        print("'produto cobertura alginato', 'produto espuma prata'.")
+    print("Fonte: ANVISA, Dados Abertos - TA_PRODUTO_SAUDE_SITE.csv")
+    print("Registro diz que o produto e regularizado no Brasil e para que tipo de uso.")
+    print("NAO diz indicacao clinica, tempo de permanencia nem tecnica: isso e protocolo.")
+
+
+def vigente(validade):
+    """'VIGENTE' ou data futura. Data vem em dd/mm/aaaa."""
+    v = (validade or "").strip().upper()
+    if v.startswith("VIGENTE"):
+        return True
+    m = re.match(r"(\d{2})/(\d{2})/(\d{4})", v)
+    if not m:
+        return False
+    import datetime
+    d, mes, a = (int(x) for x in m.groups())
+    try:
+        return datetime.date(a, mes, d) >= datetime.date.today()
+    except ValueError:
+        return False
 
 
 def cmd_cid(args):
@@ -410,7 +476,7 @@ def cmd_artigos(args):
 
 CMDS = {"sync": cmd_sync, "status": cmd_status, "med": cmd_med, "bula": cmd_bula,
         "inter": cmd_inter, "cid": cmd_cid, "proc": cmd_proc, "ram": cmd_ram,
-        "preco": cmd_preco, "artigos": cmd_artigos}
+        "preco": cmd_preco, "artigos": cmd_artigos, "produto": cmd_produto}
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in CMDS:

@@ -31,6 +31,7 @@ Todos os comandos: `python ~/.claude/skills/medicina/scripts/med.py <comando> <t
 | procedimento, técnica, se o SUS cobre | `proc <termo>` | SIGTAP (local) |
 | reação adversa notificada no Brasil | `ram <nome>` | ANVISA VigiMed |
 | preço máximo | `preco <nome>` | CMED/ANVISA |
+| curativo, cobertura, gaze, cateter, sonda, seringa | `produto <marca ou tipo>` | ANVISA produtos para saúde (local) |
 | evidência, estudo, "o que dizem as pesquisas" | `artigos <termo em inglês>` | PubMed |
 
 Comandos de manutenção: `status` (o que está em cache) e `sync` (baixar/atualizar).
@@ -41,6 +42,14 @@ Se nenhum comando cobrir a pergunta, use WebFetch nas fontes de `references/font
 
 - **`bula` responde em inglês** porque usa o rótulo do FDA. Traduza o conteúdo, mas **avise que a bula brasileira (ANVISA) é a referência legal aqui** e que pode divergir em dose e apresentação. Nomes: dipirona → `dipyrone`/`metamizole`, paracetamol → `acetaminophen`, adrenalina → `epinephrine`.
 - **`med` é registro, não é bula**: diz que o produto existe e qual a classe, não diz como administrar.
+- **Curativo não é medicamento.** Cobertura, gaze, hidrofibra, alginato, espuma, cateter e sonda são
+  *produtos para saúde* (correlatos) e ficam em outra base: use `produto`, nunca `med`. Não achar uma
+  marca em `med` não quer dizer que ela não exista. Se a marca não aparecer nem em `produto`, procure
+  pelo **tipo** (`produto curativo hidrofibra`, `produto cobertura alginato`), porque é a classe da
+  cobertura que decide a conduta, não o nome comercial.
+- **`produto` é regularização, não é indicação**: diz que o item pode ser vendido no Brasil e para que
+  tipo de uso foi registrado. Quando indicar, por quanto tempo deixar e como trocar vem de protocolo
+  (PCDT/CONITEC, manuais do Ministério da Saúde, POP da instituição).
 - **`proc` é faturamento, não é técnica**: o SIGTAP diz o que o SUS paga, nunca *como* executar. Técnica de execução = POP da instituição.
 - **`ram`/VigiMed é notificação, não causalidade**: "notificaram X" ≠ "o medicamento causa X".
 - Combine fontes quando a pergunta for ampla (ex: doença → `cid` + `artigos`; medicamento → `med` + `bula` + `inter`).

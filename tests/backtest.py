@@ -72,6 +72,20 @@ caso("ANVISA", "busca sem acento acha com acento", ["med", "insulina"],
      contem("insulina"))
 caso("ANVISA", "CONTROLE NEGATIVO: farmaco inexistente", ["med", "zoltraxina"], vazio)
 
+# ================================================= Produtos para saude (local)
+# Curativo nao e medicamento: a pergunta "pilsana hidrofibra" voltava vazia
+# porque era procurada na base errada. Estes casos guardam essa separacao.
+caso("Produtos", "hidrofibra aparece como curativo", ["produto", "hidrofibra"],
+     contem("Curativo", "ANVISA"))
+caso("Produtos", "marca conhecida achada pelo nome", ["produto", "aquacel"],
+     contem("CONVATEC"))
+caso("Produtos", "busca por tipo, duas palavras", ["produto", "cobertura", "alginato"],
+     contem("Curativo"))
+caso("Produtos", "avisa que registro nao e indicacao clinica", ["produto", "hidrofibra"],
+     contem("NAO diz indicacao"))
+caso("Produtos", "curativo NAO esta na base de medicamentos", ["med", "hidrofibra"], vazio)
+caso("Produtos", "CONTROLE NEGATIVO: produto inexistente", ["produto", "zoltrafibra"], vazio)
+
 # ============================================================== CID-10 (local)
 # gabarito: codigos oficiais da CID-10
 caso("CID-10", "I10 = hipertensao essencial", ["cid", "I10"],
