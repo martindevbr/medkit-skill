@@ -51,6 +51,16 @@ Todas as fontes abaixo foram testadas em 2026-09-14. Para cada uma: **o que cobr
 
 - Protocolos Clínicos e Diretrizes Terapêuticas: conduta oficial do Ministério da Saúde por doença.
 - PDFs, sem API. Use WebFetch. **É a melhor fonte brasileira para "qual é a conduta padrão em X".**
+- **Endereços conferidos em 2026-09-14** (respondem 200; não invente caminho, os antigos dão 404):
+  - lista de PCDT: `https://www.gov.br/conitec/pt-br/protocolos-clinicos-e-diretrizes-terapeuticas`
+  - por CID: `.../protocolos-clinicos-e-diretrizes-terapeuticas/medicamentos-por-cid-e-pcdt`
+  - diretrizes nacionais: `.../protocolos-clinicos-e-diretrizes-terapeuticas/diretrizes-nacionais-brasileiras`
+
+### ANVISA — segurança do paciente
+`https://www.gov.br/anvisa/pt-br/assuntos/servicosdesaude/seguranca-do-paciente` (200 em 2026-09-14)
+
+- Protocolos e cadernos de segurança do paciente, inclusive prevenção de lesão por pressão.
+- É a fonte nacional que **abre** para conduta de cuidado, já que a BVS/MS bloqueia robô.
 
 ### COFEN / COREN — legislação de enfermagem
 `https://www.cofen.gov.br/` · Lei 7.498/86 · Decreto 94.406/87
@@ -114,3 +124,5 @@ Seções disponíveis: `boxed_warning`, `indications_and_usage`, `dosage_and_adm
 | DATASUS CID-10 | **instável** | retry obrigatório |
 | Bulário ANVISA | **inacessível daqui** | DNS não resolve |
 | BVS / COFEN | **bloqueia robô** | usar navegador |
+| bvsms.saude.gov.br | **conexão recusada** | testado 2026-09-14, não insista: vá para CONITEC ou ANVISA |
+| pesquisa.bvsalud.org | **403** | idem |
