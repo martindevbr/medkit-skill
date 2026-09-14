@@ -23,6 +23,7 @@ import os
 import re
 import sys
 import unicodedata
+import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
@@ -74,6 +75,17 @@ def get(url, timeout=60, tentativas=4):
             req = urllib.request.Request(url, headers=UA)
             with urllib.request.urlopen(req, timeout=timeout) as r:
                 return r.read()
+        except urllib.error.HTTPError as e:
+            # 404 e 400 sao resposta definitiva ("nao existe"), nao oscilacao:
+            # repetir so atrasa. Foi isso que deixava a bula de um remedio
+            # inexistente nos EUA (dipirona) levar quase um minuto.
+            if e.code in (400, 404):
+                raise
+            erro = e
+            if i < tentativas - 1:
+                espera = 3 * (i + 1)
+                print("    tentativa %d falhou (HTTP %d); repetindo em %ds..." % (i + 1, e.code, espera))
+                time.sleep(espera)
         except Exception as e:
             erro = e
             if i < tentativas - 1:
